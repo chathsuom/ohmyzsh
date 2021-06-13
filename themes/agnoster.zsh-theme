@@ -89,7 +89,8 @@ prompt_end() {
 # Context: user@hostname (who am I and where am I)
 prompt_context() {
   if [[ "$USERNAME" != "$DEFAULT_USER" || -n "$SSH_CLIENT" ]]; then
-    prompt_segment black default "%(!.%{%F{yellow}%}.)%n@%m"
+    # prompt_segment black default "%(!.%{%F{yellow}%}.)%n@%m"
+    prompt_segment black default "%(!.%{%F{yellow}%}.)"
   fi
 }
 
@@ -204,7 +205,8 @@ prompt_hg() {
 
 # Dir: current working directory
 prompt_dir() {
-  prompt_segment blue $CURRENT_FG '%~'
+  # prompt_segment blue $CURRENT_FG '%~'
+  prompt_segment blue $CURRENT_FG '%c'
 }
 
 # Virtualenv: current working virtualenv
@@ -229,6 +231,17 @@ prompt_status() {
   [[ -n "$symbols" ]] && prompt_segment black default "$symbols"
 }
 
+prompt_terraform() {
+  # dont show 'default' workspace in home dir
+  [[ "$PWD" == ~ ]] && return
+
+   # check if in terraform dir
+   if [[ -d .terraform ]]; then
+      workspace=$(terraform workspace show 2> /dev/null) || return
+      prompt_segment green black "ට: ${workspace}"
+   fi
+}
+
 #AWS Profile:
 # - display current AWS_PROFILE name
 # - displays yellow on red if profile name contains 'production' or
@@ -238,7 +251,7 @@ prompt_aws() {
   [[ -z "$AWS_PROFILE" || "$SHOW_AWS_PROMPT" = false ]] && return
   case "$AWS_PROFILE" in
     *-prod|*production*) prompt_segment red yellow  "AWS: $AWS_PROFILE" ;;
-    *) prompt_segment green black "AWS: $AWS_PROFILE" ;;
+    *) prompt_segment green black "ඇ: $AWS_PROFILE" ;;
   esac
 }
 
@@ -249,6 +262,7 @@ build_prompt() {
   prompt_virtualenv
   prompt_aws
   prompt_context
+  prompt_terraform
   prompt_dir
   prompt_git
   prompt_bzr
